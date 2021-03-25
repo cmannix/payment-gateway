@@ -28,6 +28,7 @@ namespace PaymentGateway.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IPaymentRepository, InMemoryPaymentRepository>();
+            services.AddSingleton<IPaymentAuthoriser, AlwaysApprovesPaymentAuthoriser>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

@@ -14,19 +14,31 @@ namespace PaymentGateway.Api.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentRepository _paymentStore;
+        private readonly IPaymentAuthoriser _paymentAuthoriser;
         private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IPaymentRepository paymentStore, ILogger<PaymentController> logger)
+        public PaymentController(IPaymentRepository paymentStore, IPaymentAuthoriser paymentAuthoriser, ILogger<PaymentController> logger)
         {
             _paymentStore = paymentStore;
+            _paymentAuthoriser = paymentAuthoriser;
             _logger = logger;
         }
 
         [HttpPost]
-        public ActionResult<Payment> Authorise(PaymentRequest request)
+        public async Task<ActionResult<Payment>> Authorise(PaymentRequest request)
         {
-            var payment = new Payment(Guid.NewGuid().ToString(), request.Payment.Amount, request.Payment.Description);
-            _paymentStore.Create(payment);
+            var payment = new Payment(Guid.NewGuid().ToString(), request.Payment.Amount, request.Payment.Description, PaymentResult.Failed);
+            try
+            {
+                payment = payment with { Result = await _paymentAuthoriser.Authorise(request) };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Error authorising payment {payment.Id}, marking as failed", ex);
+                payment = payment with { Result = PaymentResult.Failed };
+            }
+            
+            await _paymentStore.Create(payment);
 
             return CreatedAtAction(nameof(Get), new { id = payment.Id }, payment);
 
