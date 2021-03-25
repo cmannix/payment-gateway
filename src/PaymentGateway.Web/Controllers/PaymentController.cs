@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using PaymentGateway.Api.Models;
-using PaymentGateway.Api.Services;
+using PaymentGateway.Domain;
+using PaymentGateway.Acquirer.Api;
+using PaymentGateway.Persistence.Api;
+using PaymentGateway.Web.Models;
 
-namespace PaymentGateway.Api.Controllers
+namespace PaymentGateway.Web.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -30,7 +30,7 @@ namespace PaymentGateway.Api.Controllers
             var payment = new Payment(Guid.NewGuid().ToString(), request.Payment.Amount, request.Payment.Description, PaymentResult.Failed);
             try
             {
-                payment = payment with { Result = await _paymentAuthoriser.Authorise(request) };
+                payment = payment with { Result = await _paymentAuthoriser.Authorise(new AuthoriseRequest("")) };
             }
             catch (Exception ex)
             {

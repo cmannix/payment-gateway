@@ -21,6 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\PaymentGateway.Api\PaymentGateway.Api.csproj" />
+    <ProjectReference Include="..\..\src\PaymentGateway.Web\PaymentGateway.Web.csproj" />
+    <ProjectReference Include="..\..\src\PaymentGateway.Domain\PaymentGateway.Domain.csproj">
+      <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+    </ProjectReference>
   </ItemGroup>
 </Project>

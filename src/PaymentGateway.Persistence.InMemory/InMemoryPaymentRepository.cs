@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using PaymentGateway.Api.Models;
+using PaymentGateway.Domain;
+using PaymentGateway.Persistence.Api;
 
-namespace PaymentGateway.Api.Services
+namespace PaymentGateway.Persistence.InMemory
 {
-    public interface IPaymentRepository
-    {
-        Task Create(Payment payment);
-        Task<Payment> Get(string id);
-    }
-
     public class InMemoryPaymentRepository : IPaymentRepository
     {
         private Dictionary<string, Payment> _payments = new();
@@ -29,7 +23,7 @@ namespace PaymentGateway.Api.Services
                 return Task.FromResult(p);
             }
             else return Task.FromResult<Payment>(null);
-            
+
         }
     }
 }

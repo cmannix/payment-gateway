@@ -5,17 +5,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using PaymentGateway.Api.Models;
-using PaymentGateway.Api.Services;
+using PaymentGateway.Acquirer.InMemory;
+using PaymentGateway.Domain;
+using PaymentGateway.Web.Models;
 using Xunit;
 
 namespace PaymentGateway.AcceptanceTests
 {
-    public class PaymentAcceptanceTests : IClassFixture<WebApplicationFactory<Api.Startup>>
+    public class PaymentAcceptanceTests : IClassFixture<WebApplicationFactory<Web.Startup>>
     {
-        private readonly WebApplicationFactory<Api.Startup> _factory;
+        private readonly WebApplicationFactory<Web.Startup> _factory;
 
-        public PaymentAcceptanceTests(WebApplicationFactory<Api.Startup> factory)
+        public PaymentAcceptanceTests(WebApplicationFactory<Web.Startup> factory)
         {
             _factory = factory;
         }
@@ -62,7 +63,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Payment_result_is_succeeded_when_authorisation_is_approved()
         {
-            var client = _testClient(services => services.AddSingleton<IPaymentAuthoriser, AlwaysApprovesPaymentAuthoriser>());
+            var client = _testClient(services => services.UsePaymentAuthoriser<AlwaysApprovesPaymentAuthoriser>());
             var paymentRequest = _generatePaymentRequest();
 
             var createResponse = await client.PostAsJsonAsync(
@@ -77,7 +78,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Payment_result_is_failed_when_authorisation_is_denied()
         {
-            var client = _testClient(services => services.AddSingleton<IPaymentAuthoriser, AlwaysDeniesPaymentAuthoriser>());
+            var client = _testClient(services => services.UsePaymentAuthoriser<AlwaysDeniesPaymentAuthoriser>());
             var paymentRequest = _generatePaymentRequest();
 
             var createResponse = await client.PostAsJsonAsync(
@@ -92,7 +93,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Payment_result_is_failed_when_authorisation_errors()
         {
-            var client = _testClient(services => services.AddSingleton<IPaymentAuthoriser, AlwaysThrowsPaymentAuthoriser>());
+            var client = _testClient(services => services.UsePaymentAuthoriser<AlwaysThrowsPaymentAuthoriser>());
             var paymentRequest = _generatePaymentRequest();
 
             var createResponse = await client.PostAsJsonAsync(
