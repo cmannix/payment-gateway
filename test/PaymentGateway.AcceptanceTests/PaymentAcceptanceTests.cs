@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -22,7 +23,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Can_create_payment()
         {
-            var client = _factory.CreateClient();
+            var client = _testClient();
             var paymentRequest = _generatePaymentRequest();
 
 
@@ -39,7 +40,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Can_retrieve_created_payment()
         {
-            var client = _factory.CreateClient();
+            var client = _testClient();
             var paymentRequest = _generatePaymentRequest();
             var createResponse = await client.PostAsJsonAsync(
                 requestUri: "/payment",
@@ -61,7 +62,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Payment_result_is_succeeded_when_authorisation_is_approved()
         {
-            var client = _factory.WithWebHostBuilder(builder => builder.ConfigureTestServices(services => services.AddSingleton<IPaymentAuthoriser, AlwaysApprovesPaymentAuthoriser>())).CreateClient();
+            var client = _testClient(services => services.AddSingleton<IPaymentAuthoriser, AlwaysApprovesPaymentAuthoriser>());
             var paymentRequest = _generatePaymentRequest();
 
             var createResponse = await client.PostAsJsonAsync(
@@ -76,7 +77,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Payment_result_is_failed_when_authorisation_is_denied()
         {
-            var client = _factory.WithWebHostBuilder(builder => builder.ConfigureTestServices(services => services.AddSingleton<IPaymentAuthoriser, AlwaysDeniesPaymentAuthoriser>())).CreateClient();
+            var client = _testClient(services => services.AddSingleton<IPaymentAuthoriser, AlwaysDeniesPaymentAuthoriser>());
             var paymentRequest = _generatePaymentRequest();
 
             var createResponse = await client.PostAsJsonAsync(
@@ -91,7 +92,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Payment_result_is_failed_when_authorisation_errors()
         {
-            var client = _factory.WithWebHostBuilder(builder => builder.ConfigureTestServices(services => services.AddSingleton<IPaymentAuthoriser, AlwaysThrowsPaymentAuthoriser>())).CreateClient();
+            var client = _testClient(services => services.AddSingleton<IPaymentAuthoriser, AlwaysThrowsPaymentAuthoriser>());
             var paymentRequest = _generatePaymentRequest();
 
             var createResponse = await client.PostAsJsonAsync(
@@ -103,7 +104,27 @@ namespace PaymentGateway.AcceptanceTests
             Assert.Equal(PaymentResult.Failed, createdPayment.Result);
         }
 
-        private PaymentRequest _generatePaymentRequest() => new (
+        private HttpClient _testClient(Action<IServiceCollection> customiseServices = null)
+        {
+            var clientOptions = new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = false
+            };
+
+            if (customiseServices is not null)
+            {
+                return _factory
+                    .WithWebHostBuilder(builder => builder.ConfigureTestServices(customiseServices))
+                    .CreateClient(clientOptions);
+            }
+            else
+            {
+                return _factory.CreateClient(clientOptions);
+            }
+
+        }
+
+        private PaymentRequest _generatePaymentRequest() => new(
                 Payment: new(
                     Amount: new(1.23m, "GBP"),
                     Description: "Test"
