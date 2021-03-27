@@ -129,7 +129,13 @@ namespace PaymentGateway.AcceptanceTests
                 Payment: new(
                     Amount: new(1.23m, "GBP"),
                     Description: "Test"
-                )
+                ),
+                Card: new(
+                    Cardholder: new(new ("Joe"), new ("London")),
+                    CardPan: new(new("1111222233334444")),
+                    CardCvv: new(new("123"))
+                ),
+                Timestamp: DateTimeOffset.UtcNow
             );
     }
 }

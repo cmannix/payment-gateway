@@ -27,10 +27,33 @@ namespace PaymentGateway.Web.Controllers
         [HttpPost]
         public async Task<ActionResult<Payment>> Authorise(PaymentRequest request)
         {
-            var payment = new Payment(Guid.NewGuid().ToString(), request.Payment.Amount, request.Payment.Description, PaymentResult.Failed);
+            var payment = new Payment(
+                Id: Guid.NewGuid().ToString(),
+                Amount: request.Payment.Amount,
+                Description: request.Payment.Description,
+                Card: new(
+                    request.Card.Cardholder,
+                    request.Card.CardPan,
+                    request.Card.CardCvv
+                ),
+                Result: PaymentResult.Failed);
             try
             {
-                payment = payment with { Result = await _paymentAuthoriser.Authorise(new AuthoriseRequest("")) };
+                var authRequest = new AuthoriseRequest(
+                    payment.Amount,
+                    payment.Card,
+                    new Merchant("Argos", "7995"),
+                    new Metadata(DateTimeOffset.UtcNow, payment.Id)
+                );
+                var authResult = await _paymentAuthoriser.Authorise(authRequest);
+                payment = payment with {
+                    Result = authResult switch
+                        {
+                            AuthoriseResult.Approved => PaymentResult.Succeeded,
+                            AuthoriseResult.Denied => PaymentResult.Failed,
+                            _ => throw new Exception($"Received unknown result from payment authoriser: '{authResult}'")
+                        }
+                };
             }
             catch (Exception ex)
             {
