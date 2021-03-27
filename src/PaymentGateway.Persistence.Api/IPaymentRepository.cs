@@ -6,6 +6,6 @@ namespace PaymentGateway.Persistence.Api
     public interface IPaymentRepository
     {
         Task Create(Payment payment);
-        Task<Payment> Get(string id);
+        Task<Payment?> Get(string id);
     }
 }

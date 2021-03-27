@@ -27,11 +27,13 @@ namespace PaymentGateway.Web.Models
             var valueType = typeToConvert.GenericTypeArguments[0];
             var converterType = typeof(SensitiveJsonConverter<>).MakeGenericType(valueType);
 
-            return (JsonConverter)Activator.CreateInstance(converterType,
+            var converter = Activator.CreateInstance(converterType,
                 BindingFlags.Instance | BindingFlags.Public,
                 binder: null,
                 args: new object[] { options },
-                culture: null);
+                culture: null) as JsonConverter;
+
+            return converter ?? throw new JsonException("Could not convert value");
         }
     }
 }

@@ -10,7 +10,7 @@ namespace PaymentGateway.Domain
     {
         public Cvv(string cvv)
         {
-            if (string.IsNullOrEmpty(cvv) || cvv.Any(c => !char.IsDigit(c)))
+            if (string.IsNullOrWhiteSpace(cvv) || cvv.Any(c => !char.IsDigit(c)))
             {
                 throw new ArgumentException("Card CVV must be non-empty. Only the characters 0-9 are allowed.");
             }
@@ -20,7 +20,7 @@ namespace PaymentGateway.Domain
 
         public Sensitive<string> Value { get; }
 
-        public bool Equals(Cvv other)
+        public bool Equals(Cvv? other)
         {
             return other is not null && other.Value == Value;
         }
@@ -32,7 +32,7 @@ namespace PaymentGateway.Domain
     {
         public Pan(string pan)
         {
-            if (string.IsNullOrEmpty(pan) || pan.Length != 16 || pan.Any(c => !char.IsDigit(c)))
+            if (string.IsNullOrWhiteSpace(pan) || pan.Length != 16 || pan.Any(c => !char.IsDigit(c)))
             {
                 throw new ArgumentException("Card PAN must be exactly 16 characters. Only the characters 0-9 are allowed.");
             }
@@ -42,7 +42,7 @@ namespace PaymentGateway.Domain
 
         public Sensitive<string> Value { get; }
 
-        public bool Equals(Pan other)
+        public bool Equals(Pan? other)
         {
             return other is not null && other.Value == Value;
         }

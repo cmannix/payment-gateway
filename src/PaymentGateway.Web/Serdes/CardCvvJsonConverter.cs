@@ -15,7 +15,8 @@ namespace PaymentGateway.Web.Models
         {
             try
             {
-                return new(reader.GetString());
+                var value = reader.GetString() ?? throw new JsonException("CVV must be provided");
+                return new(value);
             } catch (ArgumentException ex)
             {
                 throw new JsonException(ex.Message);

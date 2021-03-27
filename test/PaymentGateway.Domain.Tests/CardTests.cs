@@ -8,6 +8,7 @@ namespace PaymentGateway.Domain.Tests
         [Theory]
         [InlineData(null)]
         [InlineData("")]
+        [InlineData("   ")]
         [InlineData("111122223333444")] // Too short
         [InlineData("12412412412412412412424")] // Too long
         [InlineData("ABCDABCDABCDABCD")] // All letters
@@ -47,6 +48,7 @@ namespace PaymentGateway.Domain.Tests
         [Theory]
         [InlineData(null)]
         [InlineData("")]
+        [InlineData("   ")]
         [InlineData("ABCDAB")] // All letters
         [InlineData("12CD")] // Some letters
         public void When_CardCvv_constructor_called_with_invalid_value_then_an_ArgumentException_is_thrown(string input)

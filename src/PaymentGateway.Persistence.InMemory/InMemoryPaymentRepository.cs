@@ -16,13 +16,13 @@ namespace PaymentGateway.Persistence.InMemory
             return Task.CompletedTask;
         }
 
-        public Task<Payment> Get(string id)
+        public Task<Payment?> Get(string id)
         {
             if (_payments.TryGetValue(id, out var p))
             {
-                return Task.FromResult(p);
+                return Task.FromResult<Payment?>(p);
             }
-            else return Task.FromResult<Payment>(null);
+            else return Task.FromResult<Payment?>(null);
 
         }
     }

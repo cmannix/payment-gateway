@@ -7,7 +7,7 @@ namespace PaymentGateway.Web.Models
 {
     public class SensitiveJsonConverter<TValue> : JsonConverter<Sensitive<TValue>>
     {
-        private readonly JsonConverter<TValue> _valueConverter;
+        private readonly JsonConverter<TValue>? _valueConverter;
         private readonly Type _valueType;
 
         public SensitiveJsonConverter(JsonSerializerOptions options)
@@ -21,7 +21,7 @@ namespace PaymentGateway.Web.Models
             Type typeToConvert,
             JsonSerializerOptions options)
         {
-            TValue value;
+            TValue? value;
             if (_valueConverter != null)
             {
                 value = _valueConverter.Read(ref reader, _valueType, options);
@@ -30,6 +30,12 @@ namespace PaymentGateway.Web.Models
             {
                 value = JsonSerializer.Deserialize<TValue>(ref reader, options);
             }
+
+            if (value is null)
+            {
+                throw new JsonException("Value must be provided");
+            }
+
             return new Sensitive<TValue>(value);
         }
 

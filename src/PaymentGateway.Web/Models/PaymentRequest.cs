@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using PaymentGateway.Domain;
 
 namespace PaymentGateway.Web.Models
