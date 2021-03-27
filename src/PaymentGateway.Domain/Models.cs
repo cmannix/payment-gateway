@@ -12,14 +12,6 @@ namespace PaymentGateway.Domain
 
     public record Payment(string Id, Amount Amount, string Description, Card Card, PaymentResult Result);
 
-
-    public record Cvv(Sensitive<string> Value);
-
-    public record Cardholder(Sensitive<string> Name, Sensitive<string> Address);
-
-    public record Pan(Sensitive<string> Value);
-    public record Card(Cardholder Cardholder, Pan Pan, Cvv Cvv);
-
     public record Merchant(string Name, string merchantCategory);
 
     [DebuggerDisplay("{Value}")]

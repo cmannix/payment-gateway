@@ -11,7 +11,17 @@ namespace PaymentGateway.Web.Models
         public override Pan Read(
             ref Utf8JsonReader reader,
             Type typeToConvert,
-            JsonSerializerOptions options) => new(new Sensitive<string>(reader.GetString()));
+            JsonSerializerOptions options)
+        {
+            try
+            {
+                return new(reader.GetString());
+            }
+            catch (ArgumentException ex)
+            {
+                throw new JsonException(ex.Message);
+            }
+        }
         public override void Write(
             Utf8JsonWriter writer,
             Pan cardPanValue,
