@@ -14,6 +14,19 @@ namespace PaymentGateway.Web.Tests
     public class PaymentsControllerTests
     {
         [Fact]
+        public async Task When_authorise_payment_called_with_invalid_request_then_request_fails_with_bad_request()
+        {
+            var sut = new PaymentController(new InMemoryPaymentRepository(), new AlwaysApprovesPaymentAuthoriser(), NullLogger<PaymentController>.Instance);
+            var paymentRequest = _generatePaymentRequest();
+            sut.ModelState.AddModelError("Amount", "Required");
+
+            var result = await sut.Authorise(paymentRequest);
+
+            var actionResult = Assert.IsType<ActionResult<Payment>>(result);
+            _ = Assert.IsType<BadRequestObjectResult>(actionResult.Result);
+        }
+
+        [Fact]
         public async Task When_authorise_payment_called_with_valid_request_then_request_succeeds_and_returns_created_payment()
         {
             var sut = new PaymentController(new InMemoryPaymentRepository(), new AlwaysApprovesPaymentAuthoriser(), NullLogger<PaymentController>.Instance);

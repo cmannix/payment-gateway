@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -5,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using PaymentGateway.Acquirer.InMemory;
+using PaymentGateway.Domain;
 using PaymentGateway.Persistence.InMemory;
+using PaymentGateway.Web.Models;
 
 namespace PaymentGateway.Web
 {
@@ -24,10 +27,30 @@ namespace PaymentGateway.Web
             services.UseInMemoryPaymentStore();
             services.UsePaymentAuthoriser<AlwaysApprovesPaymentAuthoriser>();
 
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(opt => {
+                opt.JsonSerializerOptions.Converters.Add(new SensitiveJsonConverterFactory());
+                opt.JsonSerializerOptions.Converters.Add(new CardCvvJsonConverter());
+                opt.JsonSerializerOptions.Converters.Add(new CardPanJsonConverter());
+                opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PaymentGateway.Api", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PaymentGateway.Web", Version = "v1" });
+                c.MapType<Sensitive<string>>(() =>
+                    new OpenApiSchema
+                    {
+                        Type = "string",
+                    });
+                c.MapType<Pan>(() =>
+                    new OpenApiSchema
+                    {
+                        Type = "string",
+                    });
+                c.MapType<Cvv>(() =>
+                    new OpenApiSchema
+                    {
+                        Type = "string",
+                    });
             });
         }
 

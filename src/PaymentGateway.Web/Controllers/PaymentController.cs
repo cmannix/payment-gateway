@@ -27,6 +27,11 @@ namespace PaymentGateway.Web.Controllers
         [HttpPost]
         public async Task<ActionResult<Payment>> Authorise(PaymentRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var payment = new Payment(
                 Id: Guid.NewGuid().ToString(),
                 Amount: request.Payment.Amount,
