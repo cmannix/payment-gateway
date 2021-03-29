@@ -1,0 +1,12 @@
+**/bin
+**/obj
+**/.git
+
+.git
+.idea
+.vs
+.vscode
+
+Dockerfile
+.dockerignore
+.gitignore
