@@ -10,8 +10,6 @@ namespace PaymentGateway.Domain
 
     public record Amount(decimal Value, string CurrencyCode);
 
-    public record Payment(string Id, Amount Amount, string Description, Card Card, PaymentResult Result);
-
     public record Merchant(string Name, string merchantCategory);
 
     [DebuggerDisplay("{Value}")]

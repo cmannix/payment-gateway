@@ -6,6 +6,7 @@ using PaymentGateway.Domain;
 using PaymentGateway.Acquirer.Api;
 using PaymentGateway.Persistence.Api;
 using PaymentGateway.Web.Models;
+using NodaTime;
 
 namespace PaymentGateway.Web.Controllers
 {
@@ -15,71 +16,85 @@ namespace PaymentGateway.Web.Controllers
     {
         private readonly IPaymentRepository _paymentStore;
         private readonly IPaymentAuthoriser _paymentAuthoriser;
+        private readonly IClock _clock;
         private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IPaymentRepository paymentStore, IPaymentAuthoriser paymentAuthoriser, ILogger<PaymentController> logger)
+        public PaymentController(IPaymentRepository paymentStore, IPaymentAuthoriser paymentAuthoriser, IClock clock, ILogger<PaymentController> logger)
         {
             _paymentStore = paymentStore;
             _paymentAuthoriser = paymentAuthoriser;
+            _clock = clock;
             _logger = logger;
         }
 
         [HttpPost]
-        public async Task<ActionResult<Payment>> Authorise(PaymentRequest request)
+        public async Task<ActionResult<PaymentResponse>> Authorise(PaymentRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
+            var paymentId = Guid.NewGuid();
+
+            var paymentResult = await AuthorisePayment(request, paymentId);
             var payment = new Payment(
-                Id: Guid.NewGuid().ToString(),
-                Amount: request.Payment.Amount,
-                Description: request.Payment.Description,
-                Card: new(
-                    request.Card.Cardholder,
-                    request.Card.CardPan,
-                    request.Card.CardCvv
-                ),
-                Result: PaymentResult.Failed);
+                Id: paymentId,
+                Amount: request.Amount,
+                Description: request.Description,
+                Card: new(request.Card.Pan.MaskedValue, request.Card.ExpiryMonth.Value),
+                Timestamp: request.Timestamp,
+                Result: paymentResult,
+                CreatedAt: _clock.GetCurrentInstant());
+            await _paymentStore.Create(payment);
+
+            return CreatedAtAction(nameof(Get), new { id = paymentId }, PaymentResponse.FromPayment(payment));
+
+        }
+
+        private async Task<PaymentResult> AuthorisePayment(PaymentRequest request, Guid paymentId)
+        {
+            PaymentResult paymentResult;
             try
             {
                 var authRequest = new AuthoriseRequest(
-                    payment.Amount,
-                    payment.Card,
-                    new Merchant("Argos", "7995"),
-                    new Metadata(DateTimeOffset.UtcNow, payment.Id)
+                    Amount: request.Amount,
+                    Card: new(
+                        request.Card.Cardholder,
+                        request.Card.Pan,
+                        request.Card.Cvv,
+                        request.Card.ExpiryMonth
+                    ),
+                    // TODO: You could imagine this coming from either some store of merchant details, or perhaps from
+                    // claims in the token that the merchant would use to interact with the gateway
+                    new Merchant("John Lewis", "5311"),
+                    new Metadata(request.Timestamp, paymentId.ToString())
                 );
                 var authResult = await _paymentAuthoriser.Authorise(authRequest);
-                payment = payment with {
-                    Result = authResult switch
-                        {
-                            AuthoriseResult.Approved => PaymentResult.Succeeded,
-                            AuthoriseResult.Denied => PaymentResult.Failed,
-                            _ => throw new Exception($"Received unknown result from payment authoriser: '{authResult}'")
-                        }
+                paymentResult = authResult switch
+                {
+                    AuthoriseResult.Approved => PaymentResult.Succeeded,
+                    AuthoriseResult.Denied => PaymentResult.Failed,
+                    _ => throw new Exception($"Received unknown result from payment authoriser: '{authResult}'")
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Error authorising payment {payment.Id}, marking as failed", ex);
-                payment = payment with { Result = PaymentResult.Failed };
+                _logger.LogWarning($"Error authorising payment {paymentId}, marking as failed", ex);
+                paymentResult = PaymentResult.Failed;
             }
-            
-            await _paymentStore.Create(payment);
 
-            return CreatedAtAction(nameof(Get), new { id = payment.Id }, payment);
-
+            return paymentResult;
         }
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<Payment>> Get(string id)
+        public async Task<ActionResult<PaymentResponse>> Get(Guid id)
         {
             return (await _paymentStore.Get(id)) switch
             {
-                Payment p => Ok(p),
-                _ => NotFound()
+                Payment p => base.Ok(PaymentResponse.FromPayment(p)),
+                _ => base.NotFound()
             };
         }
     }

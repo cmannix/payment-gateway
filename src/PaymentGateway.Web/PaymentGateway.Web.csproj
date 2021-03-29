@@ -8,6 +8,9 @@
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'PaymentGateway.Api' " />
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
+    <PackageReference Include="NodaTime" Version="3.0.5" />
+    <PackageReference Include="NodaTime.Serialization.SystemTextJson" Version="1.0.0" />
+    <PackageReference Include="MicroElements.Swashbuckle.NodaTime" Version="4.0.1" />
   </ItemGroup>
 
   <ItemGroup>

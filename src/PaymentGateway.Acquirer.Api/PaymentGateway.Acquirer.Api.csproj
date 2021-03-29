@@ -8,4 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PaymentGateway.Domain\PaymentGateway.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NodaTime" Version="3.0.5" />
+  </ItemGroup>
 </Project>

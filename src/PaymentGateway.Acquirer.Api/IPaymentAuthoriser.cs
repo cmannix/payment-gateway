@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using PaymentGateway.Domain;
+using NodaTime;
 
 namespace PaymentGateway.Acquirer.Api
 {
@@ -15,7 +16,7 @@ namespace PaymentGateway.Acquirer.Api
         Denied
     }
 
-    public record Metadata(DateTimeOffset Timestamp, string ExternalId);
+    public record Metadata(Instant Timestamp, string ExternalId);
 
     public record AuthoriseRequest(Amount Amount, Card Card, Merchant Merchant, Metadata Metadata);
 

@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using PaymentGateway.Domain;
 using PaymentGateway.Persistence.Api;
 
 namespace PaymentGateway.Persistence.InMemory
 {
     public class InMemoryPaymentRepository : IPaymentRepository
     {
-        private Dictionary<string, Payment> _payments = new();
+        private Dictionary<Guid, Payment> _payments = new();
 
         public Task Create(Payment payment)
         {
@@ -16,7 +16,7 @@ namespace PaymentGateway.Persistence.InMemory
             return Task.CompletedTask;
         }
 
-        public Task<Payment?> Get(string id)
+        public Task<Payment?> Get(Guid id)
         {
             if (_payments.TryGetValue(id, out var p))
             {

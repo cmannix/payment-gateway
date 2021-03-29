@@ -7,7 +7,6 @@ namespace PaymentGateway.Web.Models
 {
     public class CardPanJsonConverter : JsonConverter<Pan>
     {
-
         public override Pan Read(
             ref Utf8JsonReader reader,
             Type typeToConvert,

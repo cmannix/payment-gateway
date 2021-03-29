@@ -1,4 +1,5 @@
 using System;
+using NodaTime;
 using Xunit;
 
 namespace PaymentGateway.Domain.Tests
@@ -45,6 +46,19 @@ namespace PaymentGateway.Domain.Tests
             Assert.NotEqual(pan1b, pan2);
         }
 
+        [Fact]
+        public void Pan_MaskedValue_provides_the_PAN_with_first_twelve_digits_masked()
+        {
+            var input1 = "1111222233334444";
+            var input2 = "5555666677778888";
+
+            var pan1 = new Pan(input1);
+            var pan2 = new Pan(input2);
+
+            Assert.Equal("************4444", pan1.MaskedValue);
+            Assert.Equal("************8888", pan2.MaskedValue);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]
@@ -80,6 +94,18 @@ namespace PaymentGateway.Domain.Tests
             Assert.Equal(cvv1a, cvv1b);
             Assert.NotEqual(cvv1a, cvv2);
             Assert.NotEqual(cvv1b, cvv2);
+        }
+
+        [Fact]
+        public void ExpiryMonth_equality_can_be_checked()
+        {
+            var expiry1a = new ExpiryMonth(new(2021, 02));
+            var expiry1b = new ExpiryMonth(new(2021, 02));
+            var expiry2 = new ExpiryMonth(new(2021, 08));
+
+            Assert.Equal(expiry1a, expiry1b);
+            Assert.NotEqual(expiry1a, expiry2);
+            Assert.NotEqual(expiry1b, expiry2);
         }
     }
 }

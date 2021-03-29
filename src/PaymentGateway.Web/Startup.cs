@@ -9,6 +9,10 @@ using PaymentGateway.Acquirer.InMemory;
 using PaymentGateway.Domain;
 using PaymentGateway.Persistence.InMemory;
 using PaymentGateway.Web.Models;
+using NodaTime;
+using MicroElements.Swashbuckle.NodaTime;
+using NodaTime.Serialization.SystemTextJson;
+using PaymentGateway.Web.Serdes;
 
 namespace PaymentGateway.Web
 {
@@ -26,31 +30,21 @@ namespace PaymentGateway.Web
         {
             services.UseInMemoryPaymentStore();
             services.UsePaymentAuthoriser<AlwaysApprovesPaymentAuthoriser>();
-
+            services.AddSingleton<IClock>(services => SystemClock.Instance);
             services.AddControllers().AddJsonOptions(opt => {
+                opt.JsonSerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
                 opt.JsonSerializerOptions.Converters.Add(new SensitiveJsonConverterFactory());
                 opt.JsonSerializerOptions.Converters.Add(new CardCvvJsonConverter());
                 opt.JsonSerializerOptions.Converters.Add(new CardPanJsonConverter());
+                opt.JsonSerializerOptions.Converters.Add(new CardExpiryMonthJsonConverter());
                 opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PaymentGateway.Web", Version = "v1" });
-                c.MapType<Sensitive<string>>(() =>
-                    new OpenApiSchema
-                    {
-                        Type = "string",
-                    });
-                c.MapType<Pan>(() =>
-                    new OpenApiSchema
-                    {
-                        Type = "string",
-                    });
-                c.MapType<Cvv>(() =>
-                    new OpenApiSchema
-                    {
-                        Type = "string",
-                    });
+                c.ConfigureForNodaTimeWithSystemTextJson();
+
+                c.ConfigureDomainTypes();
             });
         }
 

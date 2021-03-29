@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
+using NodaTime;
+using NodaTime.Text;
 
 namespace PaymentGateway.Domain
 {
@@ -20,13 +23,12 @@ namespace PaymentGateway.Domain
 
         public Sensitive<string> Value { get; }
 
-        public bool Equals(Cvv? other)
-        {
-            return other is not null && other.Value == Value;
-        }
+        public bool Equals(Cvv? other) => other is not null && other.Value == Value;
 
         public override int GetHashCode() => Value.GetHashCode();
     }
+
+    public record ExpiryMonth(YearMonth Value);
 
     public class Pan : IEquatable<Pan>
     {
@@ -42,12 +44,11 @@ namespace PaymentGateway.Domain
 
         public Sensitive<string> Value { get; }
 
-        public bool Equals(Pan? other)
-        {
-            return other is not null && other.Value == Value;
-        }
+        public string MaskedValue => $"************{Value.Value[^4..]}";
+
+        public bool Equals(Pan? other) => other is not null && other.Value == Value;
 
         public override int GetHashCode() => Value.GetHashCode();
     }
-    public record Card(Cardholder Cardholder, Pan Pan, Cvv Cvv);
+    public record Card(Cardholder Cardholder, Pan Pan, Cvv Cvv, ExpiryMonth ExpiryMonth);
 }
