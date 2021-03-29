@@ -19,7 +19,7 @@ namespace PaymentGateway.Web.Tests
         [Fact]
         public async Task When_authorise_payment_called_with_invalid_request_then_request_fails_with_bad_request()
         {
-            var sut = new PaymentController(new InMemoryPaymentRepository(), new AlwaysApprovesPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
+            var sut = new PaymentController(new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance), new AlwaysApprovesPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
             var paymentRequest = _generatePaymentRequest();
             sut.ModelState.AddModelError("Amount", "Required");
 
@@ -32,7 +32,7 @@ namespace PaymentGateway.Web.Tests
         [Fact]
         public async Task When_authorise_payment_called_with_valid_request_then_request_succeeds_and_returns_created_payment()
         {
-            var sut = new PaymentController(new InMemoryPaymentRepository(), new AlwaysApprovesPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
+            var sut = new PaymentController(new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance), new AlwaysApprovesPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
             var paymentRequest = _generatePaymentRequest();
 
             var result = await sut.Authorise(paymentRequest);
@@ -48,7 +48,7 @@ namespace PaymentGateway.Web.Tests
         [Fact]
         public async Task When_authorise_payment_called_with_valid_request_then_request_succeeds_and_returns_created_payment_with_masked_card_details()
         {
-            var sut = new PaymentController(new InMemoryPaymentRepository(), new AlwaysApprovesPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
+            var sut = new PaymentController(new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance), new AlwaysApprovesPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
             var paymentRequest = _generatePaymentRequest();
 
             var result = await sut.Authorise(paymentRequest);
@@ -62,7 +62,7 @@ namespace PaymentGateway.Web.Tests
         public async Task When_authorise_payment_called_with_valid_request_then_authorisation_is_requested_with_same_payment_details()
         {
             var stubPaymentAuthoriser = new RecordingPaymentAuthoriserStub();
-            var sut = new PaymentController(new InMemoryPaymentRepository(), stubPaymentAuthoriser, SystemClock.Instance, NullLogger<PaymentController>.Instance);
+            var sut = new PaymentController(new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance), stubPaymentAuthoriser, SystemClock.Instance, NullLogger<PaymentController>.Instance);
             var paymentRequest = _generatePaymentRequest();
 
             _ = await sut.Authorise(paymentRequest);
@@ -74,7 +74,7 @@ namespace PaymentGateway.Web.Tests
         public async Task When_authorise_payment_called_with_valid_request_then_authorisation_is_requested_with_same_card_details()
         {
             var stubPaymentAuthoriser = new RecordingPaymentAuthoriserStub();
-            var sut = new PaymentController(new InMemoryPaymentRepository(), stubPaymentAuthoriser, SystemClock.Instance, NullLogger<PaymentController>.Instance);
+            var sut = new PaymentController(new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance), stubPaymentAuthoriser, SystemClock.Instance, NullLogger<PaymentController>.Instance);
             var paymentRequest = _generatePaymentRequest();
 
             _ = await sut.Authorise(paymentRequest);
@@ -87,7 +87,7 @@ namespace PaymentGateway.Web.Tests
         [Fact]
         public async Task When_authorise_payment_called_with_valid_request_then_payment_is_stored_with_creation_time()
         {
-            var paymentsRepo = new InMemoryPaymentRepository();
+            var paymentsRepo = new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance);
             var expectedCreatedAtTime = SystemClock.Instance.GetCurrentInstant().Minus(Duration.FromDays(5));
             var clockStub = new ConstantTimeClockStub(expectedCreatedAtTime);
             var sut = new PaymentController(paymentsRepo, new AlwaysApprovesPaymentAuthoriser(), clockStub, NullLogger<PaymentController>.Instance);
@@ -103,7 +103,7 @@ namespace PaymentGateway.Web.Tests
         [Fact]
         public async Task Given_authorise_payment_called_with_valid_request_when_authorisation_is_approved_then_returns_successful_payment()
         {
-            var sut = new PaymentController(new InMemoryPaymentRepository(), new AlwaysApprovesPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
+            var sut = new PaymentController(new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance), new AlwaysApprovesPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
             var paymentRequest = _generatePaymentRequest();
 
             var result = await sut.Authorise(paymentRequest);
@@ -115,7 +115,7 @@ namespace PaymentGateway.Web.Tests
         [Fact]
         public async Task Given_authorise_payment_called_with_valid_request_when_authorisation_is_denied_then_returns_failed_payment()
         {
-            var sut = new PaymentController(new InMemoryPaymentRepository(), new AlwaysThrowsPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
+            var sut = new PaymentController(new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance), new AlwaysThrowsPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
             var paymentRequest = _generatePaymentRequest();
 
             var result = await sut.Authorise(paymentRequest);
@@ -127,7 +127,7 @@ namespace PaymentGateway.Web.Tests
         [Fact]
         public async Task Given_authorise_payment_called_with_valid_request_when_authorisation_fails_then_returns_denied_payment()
         {
-            var sut = new PaymentController(new InMemoryPaymentRepository(), new AlwaysThrowsPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
+            var sut = new PaymentController(new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance), new AlwaysThrowsPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
             var paymentRequest = _generatePaymentRequest();
 
             var result = await sut.Authorise(paymentRequest);
@@ -139,7 +139,7 @@ namespace PaymentGateway.Web.Tests
         [Fact]
         public async Task Given_non_existent_payment_when_get_payment_called_then_returns_not_found()
         {
-            var sut = new PaymentController(new InMemoryPaymentRepository(), new AlwaysThrowsPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
+            var sut = new PaymentController(new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance), new AlwaysThrowsPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
 
             var result = await sut.Get(Guid.NewGuid());
 
@@ -150,7 +150,7 @@ namespace PaymentGateway.Web.Tests
         [Fact]
         public async Task Given_payment_exists_when_get_payment_called_with_payment_id_then_returns_payment()
         {
-            var paymentsRepo = new InMemoryPaymentRepository();
+            var paymentsRepo = new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance);
             var existingPayment = new Payment(
                 Id: Guid.NewGuid(),
                 Amount: new(1.23m, "GBP"),

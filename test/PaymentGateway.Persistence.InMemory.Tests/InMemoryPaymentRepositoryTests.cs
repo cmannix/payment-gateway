@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
 using NodaTime;
 using PaymentGateway.Persistence.Api;
 using Xunit;
@@ -11,7 +12,7 @@ namespace PaymentGateway.Persistence.InMemory.Tests
         [Fact]
         public async Task Can_store_a_payment_for_a_merchant_id()
         {
-            var sut = new InMemoryPaymentRepository();
+            var sut = new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance);
 
             await sut.Create(
                 payment: GeneratePayment(),
@@ -21,7 +22,7 @@ namespace PaymentGateway.Persistence.InMemory.Tests
         [Fact]
         public async Task Can_retrieve_a_stored_payment_for_a_merchant_id()
         {
-            var sut = new InMemoryPaymentRepository();
+            var sut = new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance);
             var (payment, merchantId) = (GeneratePayment(), Guid.NewGuid());
             await sut.Create(payment: payment, merchantId: merchantId);
 
@@ -38,7 +39,7 @@ namespace PaymentGateway.Persistence.InMemory.Tests
         [Fact]
         public async Task Returns_null_if_no_payment_with_that_id_exists()
         {
-            var sut = new InMemoryPaymentRepository();
+            var sut = new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance);
 
             var retrievedPayment = await sut.Get(Guid.NewGuid(), Guid.NewGuid());
 
@@ -48,7 +49,7 @@ namespace PaymentGateway.Persistence.InMemory.Tests
         [Fact]
         public async Task Returns_null_if_no_payment_with_that_id_exists_for_the_provided_merchant_id()
         {
-            var sut = new InMemoryPaymentRepository();
+            var sut = new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance);
             var (payment, merchantId) = (GeneratePayment(), Guid.NewGuid());
             await sut.Create(payment: payment, merchantId: merchantId);
 
@@ -60,7 +61,7 @@ namespace PaymentGateway.Persistence.InMemory.Tests
         [Fact]
         public async Task Storing_a_payment_twice_with_the_same_id_throws()
         {
-            var sut = new InMemoryPaymentRepository();
+            var sut = new InMemoryPaymentRepository(NullLogger<InMemoryPaymentRepository>.Instance);
             var payment = GeneratePayment();
             async Task CreatePayment() => await sut.Create(payment: payment, merchantId: Guid.NewGuid());
 
