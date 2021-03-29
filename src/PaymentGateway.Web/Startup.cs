@@ -12,6 +12,7 @@ using MicroElements.Swashbuckle.NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using PaymentGateway.Web.Serdes;
 using Serilog;
+using Prometheus;
 
 namespace PaymentGateway.Web
 {
@@ -62,12 +63,14 @@ namespace PaymentGateway.Web
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseHttpMetrics();
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics();
             });
         }
     }
