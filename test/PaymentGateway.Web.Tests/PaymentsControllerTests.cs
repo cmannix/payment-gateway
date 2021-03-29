@@ -85,6 +85,22 @@ namespace PaymentGateway.Web.Tests
         }
 
         [Fact]
+        public async Task When_authorise_payment_called_with_valid_request_then_payment_is_stored_with_creation_time()
+        {
+            var paymentsRepo = new InMemoryPaymentRepository();
+            var expectedCreatedAtTime = SystemClock.Instance.GetCurrentInstant().Minus(Duration.FromDays(5));
+            var clockStub = new ConstantTimeClockStub(expectedCreatedAtTime);
+            var sut = new PaymentController(paymentsRepo, new AlwaysApprovesPaymentAuthoriser(), clockStub, NullLogger<PaymentController>.Instance);
+            var paymentRequest = _generatePaymentRequest();
+
+            var result = await sut.Authorise(paymentRequest);
+            var createdPayment = ExpectSuccessResponseWithCreatedPayment(result);
+            var storedPayment = await paymentsRepo.Get(createdPayment.Id, PaymentController.DefaultMerchant.Id);
+
+            Assert.Equal(expectedCreatedAtTime, storedPayment.CreatedAt);
+        }
+
+        [Fact]
         public async Task Given_authorise_payment_called_with_valid_request_when_authorisation_is_approved_then_returns_successful_payment()
         {
             var sut = new PaymentController(new InMemoryPaymentRepository(), new AlwaysApprovesPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
@@ -195,6 +211,17 @@ namespace PaymentGateway.Web.Tests
                 LastRequest = request;
                 return Task.FromResult(authResult);
             }
+        }
+
+        private class ConstantTimeClockStub : IClock
+        {
+            private readonly Instant instant;
+
+            public ConstantTimeClockStub(Instant instant)
+            {
+                this.instant = instant;
+            }
+            public Instant GetCurrentInstant() => instant;
         }
     }
 }
