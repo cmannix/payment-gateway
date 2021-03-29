@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using PaymentGateway.Domain;
 
-namespace PaymentGateway.Web.Models
+namespace PaymentGateway.Web.Serdes
 {
     public class SensitiveJsonConverterFactory : JsonConverterFactory
     {

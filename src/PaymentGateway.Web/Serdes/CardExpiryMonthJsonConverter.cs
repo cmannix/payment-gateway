@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 using NodaTime.Text;
 using PaymentGateway.Domain;
 
-namespace PaymentGateway.Web.Models
+namespace PaymentGateway.Web.Serdes
 {
     public class CardExpiryMonthJsonConverter : JsonConverter<ExpiryMonth>
     {
