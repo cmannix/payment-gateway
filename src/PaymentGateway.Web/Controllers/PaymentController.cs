@@ -7,6 +7,7 @@ using PaymentGateway.Acquirer.Api;
 using PaymentGateway.Persistence.Api;
 using PaymentGateway.Web.Models;
 using NodaTime;
+using System.Collections.Generic;
 
 namespace PaymentGateway.Web.Controllers
 {
@@ -37,6 +38,10 @@ namespace PaymentGateway.Web.Controllers
 
             var paymentId = Guid.NewGuid();
 
+            using var _ = _logger.BeginScope(new Dictionary<string, object> { ["PaymentId"] = paymentId, ["MerchantId"] = DefaultMerchant.Id, ["MerchantName"] = DefaultMerchant.Name });
+
+            _logger.LogInformation("Creating payment '{PaymentId}'", paymentId);
+
             var paymentResult = await AuthorisePayment(request, paymentId);
             var payment = new Payment(
                 Id: paymentId,
@@ -54,6 +59,7 @@ namespace PaymentGateway.Web.Controllers
 
         private async Task<PaymentResult> AuthorisePayment(PaymentRequest request, Guid paymentId)
         {
+            _logger.LogInformation("Authorising payment '{PaymentId}'", paymentId);
             PaymentResult paymentResult;
             try
             {
@@ -78,7 +84,7 @@ namespace PaymentGateway.Web.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Error authorising payment {paymentId}, marking as failed", ex);
+                _logger.LogWarning(ex, "Error authorising payment '{PaymentId}', marking as failed", paymentId);
                 paymentResult = PaymentResult.Failed;
             }
 
@@ -89,6 +95,9 @@ namespace PaymentGateway.Web.Controllers
         [Route("{id}")]
         public async Task<ActionResult<PaymentResponse>> Get(Guid id)
         {
+            using var _ = _logger.BeginScope(new Dictionary<string, object> { ["PaymentId"] = id, ["MerchantId"] = DefaultMerchant.Id, ["MerchantName"] = DefaultMerchant.Name });
+
+            _logger.LogInformation("Retrieving payment '{PaymentId}'", id);
             return (await _paymentStore.Get(id, DefaultMerchant.Id)) switch
             {
                 Payment p => base.Ok(PaymentResponse.FromPayment(p)),

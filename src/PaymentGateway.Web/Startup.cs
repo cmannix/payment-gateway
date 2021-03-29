@@ -11,6 +11,7 @@ using NodaTime;
 using MicroElements.Swashbuckle.NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using PaymentGateway.Web.Serdes;
+using Serilog;
 
 namespace PaymentGateway.Web
 {
@@ -55,6 +56,8 @@ namespace PaymentGateway.Web
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "PaymentGateway.Api v1"));
             }
+
+            app.UseSerilogRequestLogging();
 
             app.UseHttpsRedirection();
 
