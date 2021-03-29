@@ -1,0 +1,71 @@
+{
+	"info": {
+		"_postman_id": "df030770-e54f-4fca-9ac5-befe3ba37f39",
+		"name": "PaymentGateway",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Payment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"    pm.environment.set(\"paymentId\", jsonData.id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"card\": {\n        \"cvv\": \"{{$randomBankAccount}}\",\n        \"pan\": \"{{$randomBankAccount}}{{$randomBankAccount}}\",\n        \"expiryMonth\": \"2021-12\",\n        \"cardholder\": {\n            \"name\": \"{{$randomFullName}}\",\n            \"address\": \"{{$randomStreetAddress}}\"\n        }\n    },\n    \"amount\": {\n        \"value\": {{$randomPrice}},\n        \"currencyCode\": \"GBP\"\n    },\n    \"description\": \"{{$randomBsAdjective}} {{$randomBsNoun}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/payment/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"payment",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Payment",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/payment/{{paymentId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"payment",
+						"{{paymentId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
