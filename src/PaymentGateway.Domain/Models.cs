@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 
 namespace PaymentGateway.Domain
@@ -10,7 +11,7 @@ namespace PaymentGateway.Domain
 
     public record Amount(decimal Value, string CurrencyCode);
 
-    public record Merchant(string Name, string merchantCategory);
+    public record Merchant(Guid Id, string Name, string MerchantCategory);
 
     [DebuggerDisplay("{Value}")]
     public record Sensitive<T>(T Value)

@@ -7,20 +7,25 @@ namespace PaymentGateway.Persistence.InMemory
 {
     public class InMemoryPaymentRepository : IPaymentRepository
     {
-        private Dictionary<Guid, Payment> _payments = new();
+        private Dictionary<Guid, (Payment, Guid)> _payments = new();
 
-        public Task Create(Payment payment)
+        public Task Create(Payment payment, Guid merchantId)
         {
-            _payments[payment.Id] = payment;
-
+            if (_payments.ContainsKey(payment.Id)) {
+                throw new PaymentAlreadyExistsException(payment.Id);
+            } else
+            {
+                _payments[payment.Id] = (payment, merchantId);
+            }
             return Task.CompletedTask;
         }
 
-        public Task<Payment?> Get(Guid id)
+        public Task<Payment?> Get(Guid id, Guid merchantId)
         {
-            if (_payments.TryGetValue(id, out var p))
+            if (_payments.TryGetValue(id, out var pm))
             {
-                return Task.FromResult<Payment?>(p);
+                var (payment, mId) = pm;
+                return Task.FromResult(merchantId == mId ? payment : null);
             }
             else return Task.FromResult<Payment?>(null);
 

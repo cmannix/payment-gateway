@@ -46,7 +46,7 @@ namespace PaymentGateway.Web.Controllers
                 Timestamp: request.Timestamp,
                 Result: paymentResult,
                 CreatedAt: _clock.GetCurrentInstant());
-            await _paymentStore.Create(payment);
+            await _paymentStore.Create(payment, DefaultMerchant.Id);
 
             return CreatedAtAction(nameof(Get), new { id = paymentId }, PaymentResponse.FromPayment(payment));
 
@@ -65,9 +65,7 @@ namespace PaymentGateway.Web.Controllers
                         request.Card.Cvv,
                         request.Card.ExpiryMonth
                     ),
-                    // TODO: You could imagine this coming from either some store of merchant details, or perhaps from
-                    // claims in the token that the merchant would use to interact with the gateway
-                    new Merchant("John Lewis", "5311"),
+                    DefaultMerchant,
                     new Metadata(request.Timestamp, paymentId.ToString())
                 );
                 var authResult = await _paymentAuthoriser.Authorise(authRequest);
@@ -91,11 +89,15 @@ namespace PaymentGateway.Web.Controllers
         [Route("{id}")]
         public async Task<ActionResult<PaymentResponse>> Get(Guid id)
         {
-            return (await _paymentStore.Get(id)) switch
+            return (await _paymentStore.Get(id, DefaultMerchant.Id)) switch
             {
                 Payment p => base.Ok(PaymentResponse.FromPayment(p)),
                 _ => base.NotFound()
             };
         }
+
+        // TODO: In reality you might imagine this coming from either some store of merchant details, or perhaps from
+        // claims in the token that the merchant would use to interact with the gateway
+        public static readonly Merchant DefaultMerchant = new(Guid.NewGuid(), "John Lewis", "");
     }
 }

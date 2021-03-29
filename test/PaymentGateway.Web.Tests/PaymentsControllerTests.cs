@@ -146,7 +146,7 @@ namespace PaymentGateway.Web.Tests
                 Result: PaymentResult.Succeeded,
                 Timestamp: SystemClock.Instance.GetCurrentInstant(),
                 CreatedAt: SystemClock.Instance.GetCurrentInstant());
-            await paymentsRepo.Create(existingPayment);
+            await paymentsRepo.Create(existingPayment, PaymentController.DefaultMerchant.Id);
             var sut = new PaymentController(paymentsRepo, new AlwaysThrowsPaymentAuthoriser(), SystemClock.Instance, NullLogger<PaymentController>.Instance);
 
             var result = await sut.Get(existingPayment.Id);
