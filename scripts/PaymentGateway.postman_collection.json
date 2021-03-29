@@ -13,8 +13,17 @@
 					"script": {
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
-							"    pm.environment.set(\"paymentId\", jsonData.id);",
+							"pm.environment.set(\"paymentId\", jsonData.id);",
 							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"currentIsoTimestamp\", new Date())"
 						],
 						"type": "text/javascript"
 					}
@@ -25,7 +34,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"card\": {\n        \"cvv\": \"{{$randomBankAccount}}\",\n        \"pan\": \"{{$randomBankAccount}}{{$randomBankAccount}}\",\n        \"expiryMonth\": \"2021-12\",\n        \"cardholder\": {\n            \"name\": \"{{$randomFullName}}\",\n            \"address\": \"{{$randomStreetAddress}}\"\n        }\n    },\n    \"amount\": {\n        \"value\": {{$randomPrice}},\n        \"currencyCode\": \"GBP\"\n    },\n    \"description\": \"{{$randomBsAdjective}} {{$randomBsNoun}}\"\n}",
+					"raw": "{\n    \"card\": {\n        \"cvv\": \"{{$randomBankAccount}}\",\n        \"pan\": \"{{$randomBankAccount}}{{$randomBankAccount}}\",\n        \"expiryMonth\": \"2021-12\",\n        \"cardholder\": {\n            \"name\": \"{{$randomFullName}}\",\n            \"address\": \"{{$randomStreetAddress}}\"\n        }\n    },\n    \"amount\": {\n        \"value\": {{$randomPrice}},\n        \"currencyCode\": \"GBP\"\n    },\n    \"description\": \"{{$randomBsAdjective}} {{$randomBsNoun}}\",\n    \"timestamp\": \"{{currentIsoTimestamp}}\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"

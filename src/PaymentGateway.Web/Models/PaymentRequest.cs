@@ -21,6 +21,11 @@ namespace PaymentGateway.Web.Models
             {
                 yield return new ValidationResult("Payment currency must be GBP", new[] { nameof(Amount) });
             }
+
+            if (Timestamp == default)
+            {
+                yield return new ValidationResult("Timestamp must be provided", new[] { nameof(Timestamp) });
+            }
         }
     }
 }
