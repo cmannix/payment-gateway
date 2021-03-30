@@ -14,6 +14,8 @@ docker run -p 8080:80 ghcr.io/cmannix/payment-gateway:latest
 
 This will start the image locally on port 8080. 
 
+Note, if running on Windows, you'll have to use Linux containers.
+
 The service offers two endpoints:
   * `POST /payment` (Create a payment, returns a record of the payment, plus a result indicating whether the payment was approved or denied)
 
