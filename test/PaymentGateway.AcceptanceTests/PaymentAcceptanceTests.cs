@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
+using PaymentGateway.Acquirer.Api;
 using PaymentGateway.Acquirer.InMemory;
 using PaymentGateway.Domain;
 using PaymentGateway.Web.Models;
@@ -88,7 +89,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Payment_result_is_succeeded_when_authorisation_is_approved()
         {
-            var client = TestClient(services => services.UsePaymentAuthoriser<AlwaysApprovesPaymentAuthoriser>());
+            var client = TestClient(services => services.AddSingleton<IPaymentAuthoriser, AlwaysApprovesPaymentAuthoriser>());
             var paymentRequest = GeneratePaymentRequest();
 
             var createdPayment = await CreatePayment(client, paymentRequest);
@@ -99,7 +100,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Payment_result_is_failed_when_authorisation_is_denied()
         {
-            var client = TestClient(services => services.UsePaymentAuthoriser<AlwaysDeniesPaymentAuthoriser>());
+            var client = TestClient(services => services.AddSingleton<IPaymentAuthoriser, AlwaysDeniesPaymentAuthoriser>());
             var paymentRequest = GeneratePaymentRequest();
 
             var createdPayment = await CreatePayment(client, paymentRequest);
@@ -110,7 +111,7 @@ namespace PaymentGateway.AcceptanceTests
         [Fact]
         public async Task Payment_result_is_failed_when_authorisation_errors()
         {
-            var client = TestClient(services => services.UsePaymentAuthoriser<AlwaysThrowsPaymentAuthoriser>());
+            var client = TestClient(services => services.AddSingleton<IPaymentAuthoriser, AlwaysThrowsPaymentAuthoriser>());
             var paymentRequest = GeneratePaymentRequest();
 
             var createdPayment = await CreatePayment(client, paymentRequest);

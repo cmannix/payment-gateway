@@ -29,7 +29,7 @@ namespace PaymentGateway.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.UseInMemoryPaymentStore();
-            services.UsePaymentAuthoriser<AlwaysApprovesPaymentAuthoriser>();
+            services.UsePaymentAuthoriser(Configuration);
             services.AddSingleton<IClock>(services => SystemClock.Instance);
             services.AddControllers().AddJsonOptions(opt => {
                 opt.JsonSerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);

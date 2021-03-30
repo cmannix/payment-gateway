@@ -24,7 +24,13 @@ The API is (loosely) documented at `/swagger`, and the `scripts` directory conta
 
 Note that the current implementation uses an in-memory data store for persisting the payments, so any created payments will not survive a service restart.
 
-Similarly, the current implementation of the acquiring bank is again a degenerate implementation that will simply always approve any payment.
+Similarly, the current implementation of the acquiring bank is a simple implementation that can be configured to always approve, deny, or error when approving a payment. The default behaviour is to always **Approve** a payment - this can be changed via config, either with appsettings.json, or environment variables like so:
+
+```
+docker run -p 8080:80 --env InMemoryAcquirer__AuthoriseBehaviour=Deny  ghcr.io/cmannix/payment-gateway:latest
+```
+
+Valid values for this config are `Approve`, `Deny`, `Error`.
 
 ## Local development
 
