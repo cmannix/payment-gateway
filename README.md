@@ -12,7 +12,19 @@ To run the latest version:
 docker run -p 8080:80 ghcr.io/cmannix/payment-gateway:latest
 ```
 
-This will start the image locally on port 8080. The API is (loosely) documented at `/swagger`, and there is a Postman collection in the `scripts` repository that contains some example requests.
+This will start the image locally on port 8080. 
+
+The service offers two endpoints:
+  * `POST /payment` (Create a payment, returns a record of the payment, plus a result indicating whether the payment was approved or denied)
+
+  * `GET /payment/{id}` (Retrieve a previously created payment by ID)
+
+
+The API is (loosely) documented at `/swagger`, and the `scripts` directory contains example requests for both [Postman](https://www.postman.com) and `cURL`.
+
+Note that the current implementation uses an in-memory data store for persisting the payments, so any created payments will not survive a service restart.
+
+Similarly, the current implementation of the acquiring bank is again a degenerate implementation that will simply always approve any payment.
 
 ## Local development
 

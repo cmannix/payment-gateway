@@ -1,0 +1,24 @@
+# Create Payment
+
+curl --location --request POST 'http://localhost:8080/payment/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "card": {
+        "cvv": "3546",
+        "pan": "4547213986106510",
+        "expiryMonth": "2021-12",
+        "cardholder": {
+            "name": "Julia Tremblay",
+            "address": "755 Martine Station"
+        }
+    },
+    "amount": {
+        "value": 719.16,
+        "currencyCode": "GBP"
+    },
+    "description": "seamless e-commerce",
+    "timestamp": "2021-03-29T17:47:43.899Z"
+}'
+
+# Get Payment
+curl --location --request GET 'http://localhost:8080/payment/8c376c71-a94b-4f5d-8997-0092e5babe3d'

@@ -3,8 +3,14 @@ name: Build and Test
 on:
   push:
     branches: [ main ]
+    paths_ignore:
+      - 'README.md'
+      - 'scripts/*'
   pull_request:
     branches: [ main ]
+    paths_ignore:
+      - 'README.md'
+      - 'scripts/*'
 
 env:
   PUSH_PACKAGES: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
